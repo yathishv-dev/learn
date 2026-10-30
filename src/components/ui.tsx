@@ -73,14 +73,16 @@ export function Field({
 export function Alert({
   children,
   success = false,
+  info = false,
 }: {
   children: ReactNode;
   success?: boolean;
+  info?: boolean;
 }) {
   return (
     <div
-      className={`alert ${success ? "alert-success" : ""}`}
-      role={success ? "status" : "alert"}
+      className={`alert ${success ? "alert-success" : info ? "alert-info" : ""}`}
+      role={success || info ? "status" : "alert"}
     >
       {children}
     </div>

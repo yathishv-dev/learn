@@ -306,6 +306,11 @@ select {
   background: #f0f7f1;
   border-color: #d6e6d9;
 }
+.alert-info {
+  color: #6b5379;
+  background: #f1edf5;
+  border-color: #dfd3e8;
+}
 .loading-screen {
   min-height: 100dvh;
   display: flex;

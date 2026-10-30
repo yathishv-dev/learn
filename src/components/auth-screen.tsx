@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   ArrowRight,
   AudioLines,
@@ -29,12 +29,42 @@ export function AuthScreen({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [confirmationEmail, setConfirmationEmail] = useState("");
+  const [resending, setResending] = useState(false);
+  const [resendLocked, setResendLocked] = useState(false);
   const t = translator(language);
+
+  useEffect(() => {
+    if (!resendLocked) return;
+    const timer = window.setTimeout(() => setResendLocked(false), 60_000);
+    return () => window.clearTimeout(timer);
+  }, [resendLocked]);
+
+  async function resendConfirmation() {
+    if (!confirmationEmail || resending || resendLocked) return;
+    setResending(true);
+    setError("");
+    try {
+      const { error } = await getSupabase().auth.resend({
+        type: "signup",
+        email: confirmationEmail,
+        options: { emailRedirectTo: window.location.origin },
+      });
+      if (error) throw error;
+      setNotice(t("confirmationResent"));
+      setResendLocked(true);
+    } catch (error) {
+      setError(friendlyError(error, language));
+    } finally {
+      setResending(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setNotice("");
+    setConfirmationEmail("");
     if (!supabaseConfigured) {
       setError(t("setupText"));
       return;
@@ -67,6 +97,7 @@ export function AuthScreen({
         if (authError) throw authError;
         if (!data.session) {
           setNotice(t("checkEmail"));
+          setConfirmationEmail(email);
           setRegister(false);
         }
       } else {
@@ -74,7 +105,13 @@ export function AuthScreen({
           email,
           password,
         });
-        if (authError) throw authError;
+        if (
+          authError?.code === "email_not_confirmed" ||
+          authError?.message.includes("Email not confirmed")
+        ) {
+          setConfirmationEmail(email);
+          setNotice(t("confirmBeforeSignIn"));
+        } else if (authError) throw authError;
       }
     } catch (err) {
       setError(friendlyError(err, language));
@@ -196,7 +233,17 @@ export function AuthScreen({
             </Alert>
           )}
           {error && <Alert>{error}</Alert>}
-          {notice && <Alert success>{notice}</Alert>}
+          {notice && <Alert info>{notice}</Alert>}
+          {confirmationEmail && (
+            <Button
+              variant="secondary"
+              loading={resending}
+              disabled={busy || resendLocked}
+              onClick={() => void resendConfirmation()}
+            >
+              {t(resendLocked ? "confirmationRequested" : "resendConfirmation")}
+            </Button>
+          )}
           <form onSubmit={submit} className="auth-form">
             {register && (
               <div className="field-grid">
@@ -231,6 +278,15 @@ export function AuthScreen({
                 required
                 autoComplete="email"
                 placeholder="you@example.com"
+                onChange={(event) => {
+                  if (
+                    confirmationEmail &&
+                    event.target.value.trim() !== confirmationEmail
+                  ) {
+                    setConfirmationEmail("");
+                    setNotice("");
+                  }
+                }}
               />
             </Field>
             <div className={register ? "field-grid" : ""}>
@@ -295,7 +351,7 @@ export function AuthScreen({
             <Button
               type="submit"
               loading={busy}
-              disabled={!supabaseConfigured}
+              disabled={!supabaseConfigured || resending}
               className="auth-submit"
             >
               {t(register ? "createAccount" : "signIn")}
@@ -310,6 +366,7 @@ export function AuthScreen({
                 setRegister(!register);
                 setError("");
                 setNotice("");
+                setConfirmationEmail("");
               }}
             >
               {t(register ? "signIn" : "registerLink")}

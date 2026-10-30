@@ -207,7 +207,16 @@ const en = {
   alreadyAccount: "Already have an account?",
   newAccount: "New to Vyapaar Voice?",
   registerLink: "Get started",
-  checkEmail: "Check your email to confirm your account, then sign in.",
+  checkEmail:
+    "Account created. Open the confirmation link in your email (check Spam too), then sign in.",
+  confirmBeforeSignIn:
+    "Your email address hasn’t been confirmed yet. Open the confirmation link in your inbox or Spam folder, then return here to sign in.",
+  resendConfirmation: "Resend confirmation email",
+  confirmationResent:
+    "A new confirmation email was requested. Check your inbox and Spam folder, then return here to sign in.",
+  confirmationRequested: "Email requested · please wait",
+  emailRateLimited:
+    "The email service limit has been reached. Use the confirmation email already sent, or wait before requesting another.",
   mismatch: "Passwords don’t match.",
   selectAtRegistration: "Choose what feels familiar",
   setupTitle: "Your workspace is nearly ready",
@@ -468,7 +477,16 @@ const kn: Record<keyof typeof en, string> = {
   alreadyAccount: "ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ?",
   newAccount: "ವ್ಯಾಪಾರ್ ವಾಯ್ಸ್‌ಗೆ ಹೊಸಬರೇ?",
   registerLink: "ಆರಂಭಿಸಿ",
-  checkEmail: "ಖಾತೆ ದೃಢೀಕರಿಸಲು ಇಮೇಲ್ ನೋಡಿ, ನಂತರ ಸೈನ್ ಇನ್ ಮಾಡಿ.",
+  checkEmail:
+    "ಖಾತೆ ರಚಿಸಲಾಗಿದೆ. ಇಮೇಲ್‌ನ ದೃಢೀಕರಣ ಲಿಂಕ್ ತೆರೆಯಿರಿ (ಸ್ಪ್ಯಾಮ್ ಕೂಡ ನೋಡಿ), ನಂತರ ಸೈನ್ ಇನ್ ಮಾಡಿ.",
+  confirmBeforeSignIn:
+    "ನಿಮ್ಮ ಇಮೇಲ್ ಇನ್ನೂ ದೃಢೀಕರಿಸಿಲ್ಲ. ಇನ್‌ಬಾಕ್ಸ್ ಅಥವಾ ಸ್ಪ್ಯಾಮ್‌ನ ದೃಢೀಕರಣ ಲಿಂಕ್ ತೆರೆಯಿರಿ, ನಂತರ ಇಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಿ.",
+  resendConfirmation: "ದೃಢೀಕರಣ ಇಮೇಲ್ ಮತ್ತೆ ಕಳುಹಿಸಿ",
+  confirmationResent:
+    "ಹೊಸ ದೃಢೀಕರಣ ಇಮೇಲ್ ಕೋರಲಾಗಿದೆ. ಇನ್‌ಬಾಕ್ಸ್ ಮತ್ತು ಸ್ಪ್ಯಾಮ್ ನೋಡಿ, ನಂತರ ಇಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಿ.",
+  confirmationRequested: "ಇಮೇಲ್ ಕೋರಲಾಗಿದೆ · ಸ್ವಲ್ಪ ಕಾಯಿರಿ",
+  emailRateLimited:
+    "ಇಮೇಲ್ ಸೇವೆಯ ಮಿತಿ ತಲುಪಿದೆ. ಈಗಾಗಲೇ ಬಂದಿರುವ ದೃಢೀಕರಣ ಇಮೇಲ್ ಬಳಸಿ ಅಥವಾ ಮತ್ತೆ ಕೋರುವ ಮೊದಲು ಕಾಯಿರಿ.",
   mismatch: "ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ.",
   selectAtRegistration: "ನಿಮಗೆ ಪರಿಚಿತವಾದ ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ",
   setupTitle: "ನಿಮ್ಮ ಖಾತೆ ಬಹುತೇಕ ಸಿದ್ಧವಾಗಿದೆ",
@@ -551,7 +569,12 @@ export function friendlyError(error: unknown, lang: Language): string {
     return lang === "kn"
       ? "ಇಮೇಲ್ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್ ಸರಿಯಿಲ್ಲ."
       : "The email or password is incorrect.";
-  if (message.includes("Email not confirmed")) return t("checkEmail");
+  if (message.includes("Email not confirmed")) return t("confirmBeforeSignIn");
+  if (
+    message.toLowerCase().includes("email rate limit") ||
+    message.includes("over_email_send_rate_limit")
+  )
+    return t("emailRateLimited");
   if (message.includes("User already registered"))
     return lang === "kn"
       ? "ಈ ಇಮೇಲ್‌ಗೆ ಈಗಾಗಲೇ ಖಾತೆ ಇದೆ. ಸೈನ್ ಇನ್ ಮಾಡಿ."
