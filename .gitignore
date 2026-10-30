@@ -8,3 +8,5 @@ out/
 supabase/.temp/
 supabase/.branches/
 artifacts/
+
+.env*.local
