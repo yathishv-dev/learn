@@ -2,6 +2,12 @@
 
 A small-shop business intelligence MVP for **MakerSprint PS 06**. Track inventory, sales and expenses; ask questions against your shop’s saved records; and turn English or Kannada speech into an editable form before saving.
 
+Live application: [vyapaar-voice.vercel.app](https://vyapaar-voice.vercel.app).
+
+## Where the backend lives
+
+The frontend and backend share one Next.js project. TypeScript request handlers live in `src/app/api/`: `chat/route.ts`, `voice/parse/route.ts` and `speech/route.ts`. Shared authentication and request validation live in `src/lib/server.ts`. Inventory, sales and expenses use Supabase's generated API with owner-based row-level security; transactional sales and SQL reports are defined in `supabase/migrations/`.
+
 ## Stack
 
 - React + TypeScript, using Next.js App Router for the UI and TypeScript API routes
